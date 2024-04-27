@@ -8,7 +8,7 @@ const login =  async(req, res)=>{
             where: {email},
         });
         if (!user) {
-            return res.status(400).json({ status: 400, message:'User does not exist',data:[] });
+            return res.status(400).json({ status: 400, message:'Invalid email or Password',data:[] });
           }
           if (password === user.password) {
             user.password = null;

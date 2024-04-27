@@ -1,4 +1,4 @@
-import {Services, Category,Booking} from '../../database/models'
+import {Services, Category,Booking,User} from '../../database/models'
 
 
 
@@ -125,40 +125,35 @@ const updateService = async (req, res) => {
   
   const cancelBookedService = async (req, res) => {
     try {
-      const { userId, bookingId } = req.body;
+      const { userId, id, userRole } = req.body; 
   
-      // Check if userId and bookingId are provided
-      if (!userId || !bookingId) {
-        return res.status(400).json({ status: 400, message: 'Please provide valid userId and bookingId' });
-      }
       // Find the booking
       const booking = await Booking.findOne({ where: { id } });
       if (!booking) {
         return res.status(404).json({ status: 404, message: 'Booking not found' });
       }
   
-      // Check if the booking belongs to the user
-      if (booking.userId !== userId) {
+      // Check if the booking belongs to the user or if the user is an Admin
+      if (booking.userId !== userId && userRole !== 'Admin') {
         return res.status(403).json({ status: 403, message: 'You are not authorized to cancel this booking' });
       }
   
-      // Find the associated service
-      const service = await Services.findOne({where: {id}});
+      const service = await Services.findOne({ where: { id: booking.serviceId } });
       if (!service) {
         return res.status(404).json({ status: 404, message: 'Associated service not found' });
       }
   
       // Increase the ticket availability for the service
-      await Services.increment('ticketAvailability', { by: booking.numberOfTicket, where: { id: service.id } });;
+      await Services.increment('ticketAvailability', { by: booking.numberOfTicket, where: { id: service.id } });
   
       // Delete the booking
-      await booking.destroy();
+      await booking.destroy({ where: { id } });
   
       return res.status(200).json({ status: 200, message: 'Booking canceled successfully' });
     } catch (error) {
       return res.status(500).json({ status: 500, message: error.message });
     }
-  }
+  }  
     
   const getUserBookedService = async (req, res) => {
     try {
@@ -168,7 +163,6 @@ const updateService = async (req, res) => {
         return res.status(400).json({ status: 400, message: 'Please provide valid userId' });
       }
   
-      // Eager loading with service details
       const bookings = await Booking.findAll({
         where: { userId },
         include: {
@@ -183,4 +177,24 @@ const updateService = async (req, res) => {
     }
   };
 
-export default{getServices, addService, deleteService, updateService, getServiceById, bookService, cancelBookedService,getUserBookedService}
+  const getAllBookings = async (req, res) => {
+    try {
+      const allBookings = await Booking.findAll({
+        include: [
+          {
+            model: Services,
+            attributes: ['id', 'title', 'date', 'location', 'ticketAvailability'],
+          },
+          {
+            model: User, // Include the User model
+            attributes: ['username'], // Fetch the username attribute
+          }
+        ],
+      });
+      res.status(200).json({status:200, message:"Booking retrieved", data:allBookings});
+    } catch (error) {
+      res.status(error.status).json({status:error.status,message:error.message,data:[]});
+    }
+  }  
+
+export default{getServices, addService, deleteService, updateService, getServiceById, bookService, cancelBookedService,getUserBookedService,getAllBookings}

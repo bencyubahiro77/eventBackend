@@ -6,12 +6,17 @@ module.exports = {
    await queryInterface.bulkInsert('Categories',
    [
     {
-      CategoryName: "Football",
+      CategoryName: "Sport",
       createdAt: new Date(),
       updatedAt:new Date()
     },
     {
       CategoryName: "Music",
+      createdAt: new Date(),
+      updatedAt: new Date()
+    },
+    {
+      CategoryName: "Other",
       createdAt: new Date(),
       updatedAt: new Date()
     },

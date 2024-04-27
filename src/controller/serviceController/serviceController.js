@@ -91,7 +91,6 @@ const updateService = async (req, res) => {
     try {
       const { userId, serviceId, numberOfTicket } = req.body;
   
-      // Check if userId, serviceId, and numberOfTicket are provided
       if (!userId || !serviceId || !numberOfTicket || numberOfTicket <= 0) {
         return res.status(400).json({ status: 400, message: 'Please provide valid userId, serviceId, and numberOfTicket' });
       }

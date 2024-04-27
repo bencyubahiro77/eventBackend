@@ -185,8 +185,8 @@ const updateService = async (req, res) => {
             attributes: ['id', 'title', 'date', 'location', 'ticketAvailability'],
           },
           {
-            model: User, // Include the User model
-            attributes: ['username'], // Fetch the username attribute
+            model: User, 
+            attributes: ['username'], 
           }
         ],
       });
